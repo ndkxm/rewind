@@ -1,13 +1,32 @@
 import { useState, useCallback } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { MediaItem, SelectedImage, UploadStatus } from "../types";
-import { uploadMedia } from "../services/mediaApi";
+import { MediaItem, SelectedImage, UploadStatus, NamingStrategy } from "../types";
+import { uploadMedia, uploadBatchMedia } from "../services/mediaApi";
 
-export function useMediaCapture(onSuccess?: (item: MediaItem) => void) {
-  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null);
+interface UseMediaCaptureOptions {
+  onSuccess?: (item: MediaItem) => void;
+  onBatchSuccess?: (items: MediaItem[]) => void;
+}
+
+export function useMediaCapture(
+  onSuccessOrOptions?: ((item: MediaItem) => void) | UseMediaCaptureOptions
+) {
+  const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
+  const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
+  const [namingStrategy, setNamingStrategy] = useState<NamingStrategy>("AI_GENERATED");
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const onSuccess = typeof onSuccessOrOptions === "function"
+    ? onSuccessOrOptions
+    : onSuccessOrOptions?.onSuccess;
+  const onBatchSuccess = typeof onSuccessOrOptions === "object"
+    ? onSuccessOrOptions.onBatchSuccess
+    : undefined;
+
+  /**
+   * Capture a single document photo with camera.
+   */
   const capturePhoto = useCallback(async () => {
     try {
       const permission = await ImagePicker.requestCameraPermissionsAsync();
@@ -24,14 +43,16 @@ export function useMediaCapture(onSuccess?: (item: MediaItem) => void) {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
-        setSelectedImage({
+        const newImage: SelectedImage = {
           uri: asset.uri,
           fileName: asset.fileName ?? `capture_${Date.now()}.jpg`,
           fileSize: asset.fileSize,
           width: asset.width,
           height: asset.height,
           mimeType: asset.mimeType ?? "image/jpeg",
-        });
+        };
+        setSelectedImages([newImage]);
+        setActiveImageIndex(0);
         setErrorMessage(null);
       }
     } catch (err) {
@@ -39,6 +60,10 @@ export function useMediaCapture(onSuccess?: (item: MediaItem) => void) {
     }
   }, []);
 
+  /**
+   * Import one or multiple images from device gallery.
+   * Enables allowsMultipleSelection to support bulk import.
+   */
   const pickImage = useCallback(async () => {
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -50,19 +75,21 @@ export function useMediaCapture(onSuccess?: (item: MediaItem) => void) {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
         quality: 0.85,
-        allowsEditing: false,
+        allowsMultipleSelection: true,
+        selectionLimit: 15,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        const asset = result.assets[0];
-        setSelectedImage({
+        const items: SelectedImage[] = result.assets.map((asset, index) => ({
           uri: asset.uri,
-          fileName: asset.fileName ?? `gallery_${Date.now()}.jpg`,
+          fileName: asset.fileName ?? `gallery_${Date.now()}_${index + 1}.jpg`,
           fileSize: asset.fileSize,
           width: asset.width,
           height: asset.height,
           mimeType: asset.mimeType ?? "image/jpeg",
-        });
+        }));
+        setSelectedImages(items);
+        setActiveImageIndex(0);
         setErrorMessage(null);
       }
     } catch (err) {
@@ -70,33 +97,56 @@ export function useMediaCapture(onSuccess?: (item: MediaItem) => void) {
     }
   }, []);
 
+  /**
+   * Upload all selected images (single or batch) using the selected naming strategy.
+   */
   const confirmUpload = useCallback(async () => {
-    if (!selectedImage) return;
+    if (selectedImages.length === 0) return;
 
     setUploadStatus("uploading");
     setErrorMessage(null);
 
     try {
-      const uploadedItem = await uploadMedia(selectedImage);
-      setUploadStatus("success");
-      if (onSuccess) {
-        onSuccess(uploadedItem);
+      if (selectedImages.length === 1) {
+        const uploadedItem = await uploadMedia(selectedImages[0], namingStrategy);
+        setUploadStatus("success");
+        if (onSuccess) {
+          onSuccess(uploadedItem);
+        }
+        if (onBatchSuccess) {
+          onBatchSuccess([uploadedItem]);
+        }
+      } else {
+        const uploadedItems = await uploadBatchMedia(selectedImages, namingStrategy);
+        setUploadStatus("success");
+        if (onBatchSuccess) {
+          onBatchSuccess(uploadedItems);
+        } else if (onSuccess) {
+          uploadedItems.forEach((item) => onSuccess(item));
+        }
       }
-      setSelectedImage(null);
+      setSelectedImages([]);
+      setActiveImageIndex(0);
     } catch (err) {
       setUploadStatus("error");
       setErrorMessage(err instanceof Error ? err.message : "Failed to upload image");
     }
-  }, [selectedImage, onSuccess]);
+  }, [selectedImages, namingStrategy, onSuccess, onBatchSuccess]);
 
   const cancelSelection = useCallback(() => {
-    setSelectedImage(null);
+    setSelectedImages([]);
+    setActiveImageIndex(0);
     setUploadStatus("idle");
     setErrorMessage(null);
   }, []);
 
   return {
-    selectedImage,
+    selectedImages,
+    selectedImage: selectedImages[activeImageIndex] ?? null,
+    activeImageIndex,
+    setActiveImageIndex,
+    namingStrategy,
+    setNamingStrategy,
     uploadStatus,
     errorMessage,
     capturePhoto,
