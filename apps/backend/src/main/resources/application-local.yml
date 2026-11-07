@@ -1,0 +1,10 @@
+# Local development profile
+# Override settings for local development here
+spring:
+  application:
+    name: rewind-backend
+
+logging:
+  level:
+    com.rewind: DEBUG
+    org.springframework.web: INFO

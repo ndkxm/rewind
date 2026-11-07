@@ -1,0 +1,212 @@
+openapi: 3.0.3
+info:
+  title: Rewind API
+  description: |
+    REST API for Rewind — AI-powered mobile application for managing and extracting information from images.
+
+    Status: Bootstrap initial contract.
+    Only the health check endpoint is currently IMPLEMENTED. All other endpoints are PLANNED.
+  version: 0.1.0
+  contact:
+    name: Rewind Team
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  # =========================================================================
+  # IMPLEMENTED ENDPOINTS
+  # =========================================================================
+
+  /api/v1/health:
+    get:
+      summary: Health check
+      description: Returns service health status and timestamp. (IMPLEMENTED)
+      operationId: getHealth
+      tags:
+        - Common
+      responses:
+        '200':
+          description: Service is healthy and responding.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: "UP"
+                service: "rewind-backend"
+                timestamp: "2026-11-07T12:00:00.000Z"
+
+  # =========================================================================
+  # PLANNED ENDPOINTS (Not yet implemented)
+  # =========================================================================
+
+  /api/v1/auth/register:
+    post:
+      summary: Register new user (PLANNED)
+      description: Creates a new user account.
+      tags:
+        - Auth (Planned)
+      responses:
+        '501':
+          description: Not implemented yet
+
+  /api/v1/auth/login:
+    post:
+      summary: User login (PLANNED)
+      description: Authenticates user and returns JWT or session token.
+      tags:
+        - Auth (Planned)
+      responses:
+        '501':
+          description: Not implemented yet
+
+  /api/v1/auth/logout:
+    post:
+      summary: User logout (PLANNED)
+      description: Invalidates current session or token.
+      tags:
+        - Auth (Planned)
+      responses:
+        '501':
+          description: Not implemented yet
+
+  /api/v1/users/me:
+    get:
+      summary: Get current user profile (PLANNED)
+      description: Returns profile and settings of authenticated user.
+      tags:
+        - Users (Planned)
+      responses:
+        '501':
+          description: Not implemented yet
+
+  /api/v1/media:
+    get:
+      summary: List user media items (PLANNED)
+      description: Returns paginated list of media belonging to authenticated user.
+      tags:
+        - Media (Planned)
+      responses:
+        '501':
+          description: Not implemented yet
+    post:
+      summary: Upload new image and OCR metadata (PLANNED)
+      description: Uploads image file to storage and creates media record + processing job.
+      tags:
+        - Media (Planned)
+      responses:
+        '501':
+          description: Not implemented yet
+
+  /api/v1/media/{id}:
+    get:
+      summary: Get media detail and extracted data (PLANNED)
+      tags:
+        - Media (Planned)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '501':
+          description: Not implemented yet
+    delete:
+      summary: Delete media and associated extraction data (PLANNED)
+      tags:
+        - Media (Planned)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '501':
+          description: Not implemented yet
+
+  /api/v1/processing/{jobId}/status:
+    get:
+      summary: Check status of async image processing job (PLANNED)
+      tags:
+        - Processing (Planned)
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '501':
+          description: Not implemented yet
+
+  /api/v1/search:
+    get:
+      summary: Search media by keyword or semantic query (PLANNED)
+      tags:
+        - Search (Planned)
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '501':
+          description: Not implemented yet
+
+  /api/v1/tags:
+    get:
+      summary: List user tags (PLANNED)
+      tags:
+        - Tags (Planned)
+      responses:
+        '501':
+          description: Not implemented yet
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+        - timestamp
+      properties:
+        status:
+          type: string
+          example: "UP"
+        service:
+          type: string
+          example: "rewind-backend"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-11-07T12:00:00.000Z"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - timestamp
+      properties:
+        error:
+          type: string
+          example: "NOT_FOUND"
+        message:
+          type: string
+          example: "Requested resource was not found."
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-11-07T12:00:00.000Z"
+        details:
+          type: object
+          nullable: true
