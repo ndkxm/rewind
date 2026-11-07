@@ -50,6 +50,7 @@ class MediaControllerTest {
                 "users/" + userId + "/" + mediaId + ".jpg",
                 "https://example.com/signed/" + mediaId,
                 "receipt.jpg",
+                "receipt.jpg",
                 "image/jpeg",
                 18L,
                 1080,
@@ -60,19 +61,53 @@ class MediaControllerTest {
                 Instant.now()
         );
 
-        when(mediaService.uploadMedia(eq(userId), any(), eq(1080), eq(1920), any()))
+        when(mediaService.uploadMedia(eq(userId), any(), eq(1080), eq(1920), any(), any(), eq("KEEP_ORIGINAL")))
                 .thenReturn(expectedResponse);
 
         mockMvc.perform(multipart("/api/v1/media")
                         .file(file)
                         .param("width", "1080")
                         .param("height", "1920")
+                        .param("namingStrategy", "KEEP_ORIGINAL")
                         .header("X-User-Id", userId.toString()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(mediaId.toString()))
                 .andExpect(jsonPath("$.originalFilename").value("receipt.jpg"))
+                .andExpect(jsonPath("$.title").value("receipt.jpg"))
                 .andExpect(jsonPath("$.mimeType").value("image/jpeg"))
                 .andExpect(jsonPath("$.processingStatus").value("UPLOADED"));
+    }
+
+    @Test
+    void uploadBatchMedia_ShouldReturnCreated_WhenMultipleImages() throws Exception {
+        UUID userId = UUID.randomUUID();
+        MockMultipartFile file1 = new MockMultipartFile("files", "img1.jpg", MediaType.IMAGE_JPEG_VALUE, "1".getBytes());
+        MockMultipartFile file2 = new MockMultipartFile("files", "img2.jpg", MediaType.IMAGE_JPEG_VALUE, "2".getBytes());
+
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+
+        MediaResponse res1 = new MediaResponse(
+                id1, userId, "path1", "https://signed.url/1", "img1.jpg", null,
+                "image/jpeg", 1L, null, null, Instant.now(), ProcessingStatus.UPLOADED, Instant.now(), Instant.now()
+        );
+        MediaResponse res2 = new MediaResponse(
+                id2, userId, "path2", "https://signed.url/2", "img2.jpg", null,
+                "image/jpeg", 1L, null, null, Instant.now(), ProcessingStatus.UPLOADED, Instant.now(), Instant.now()
+        );
+
+        when(mediaService.uploadBatchMedia(eq(userId), any(), eq("AI_GENERATED")))
+                .thenReturn(List.of(res1, res2));
+
+        mockMvc.perform(multipart("/api/v1/media/batch")
+                        .file(file1)
+                        .file(file2)
+                        .param("namingStrategy", "AI_GENERATED")
+                        .header("X-User-Id", userId.toString()))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(id1.toString()))
+                .andExpect(jsonPath("$[1].id").value(id2.toString()));
     }
 
     @Test

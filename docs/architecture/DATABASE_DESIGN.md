@@ -36,7 +36,8 @@ Stores metadata for each uploaded image. The actual image file is in Supabase St
 | `id` | `UUID` | PK, DEFAULT gen_random_uuid() | Unique media identifier |
 | `user_id` | `UUID` | FK → users(id), NOT NULL | Owning user |
 | `storage_path` | `VARCHAR(500)` | NOT NULL | Path in Supabase Storage |
-| `original_filename` | `VARCHAR(255)` | | Original file name from device |
+| `original_filename` | `VARCHAR(255)` | | Original physical file name from device |
+| `title` | `VARCHAR(255)` | | User-facing display title (AI-generated or original filename) |
 | `mime_type` | `VARCHAR(50)` | NOT NULL | Image MIME type (e.g., image/jpeg) |
 | `file_size_bytes` | `BIGINT` | NOT NULL | File size in bytes |
 | `width` | `INTEGER` | | Image width in pixels |

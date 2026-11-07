@@ -84,6 +84,9 @@ public class SupabaseStorageService implements StorageService {
 
             if (response != null && response.containsKey("signedURL")) {
                 String relativeSignedUrl = (String) response.get("signedURL");
+                if (relativeSignedUrl != null && !relativeSignedUrl.startsWith("/storage/v1")) {
+                    relativeSignedUrl = "/storage/v1" + (relativeSignedUrl.startsWith("/") ? "" : "/") + relativeSignedUrl;
+                }
                 return supabaseUrl + relativeSignedUrl;
             }
 

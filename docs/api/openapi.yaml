@@ -97,6 +97,14 @@ paths:
                   type: string
                   format: date-time
                   description: Optional timestamp of when the photo was taken.
+                title:
+                  type: string
+                  description: Optional user-facing title for the document.
+                namingStrategy:
+                  type: string
+                  enum: [AI_GENERATED, KEEP_ORIGINAL]
+                  default: AI_GENERATED
+                  description: Strategy for document title generation.
       responses:
         '201':
           description: Image successfully uploaded and stored.
@@ -104,6 +112,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MediaResponse'
+
+  /api/v1/media/batch:
+    post:
+      summary: Upload multiple images in bulk (IMPLEMENTED)
+      description: Uploads multiple image files to Supabase private storage and creates media records.
+      operationId: uploadBatchMedia
+      tags:
+        - Media
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - files
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: The image files to upload.
+                namingStrategy:
+                  type: string
+                  enum: [AI_GENERATED, KEEP_ORIGINAL]
+                  default: AI_GENERATED
+                  description: Strategy for document title generation for all batch items.
+      responses:
+        '201':
+          description: Images successfully uploaded and stored.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MediaResponse'
 
   # =========================================================================
   # PLANNED ENDPOINTS (Not yet implemented)
@@ -286,6 +338,10 @@ components:
           type: string
         originalFilename:
           type: string
+        title:
+          type: string
+          nullable: true
+          description: User-facing display title (either AI-generated or preserved original filename)
         mimeType:
           type: string
         fileSizeBytes:

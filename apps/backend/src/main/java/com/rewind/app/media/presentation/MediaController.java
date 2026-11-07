@@ -30,16 +30,36 @@ public class MediaController {
         this.mediaService = mediaService;
     }
 
+    /**
+     * Upload a single image file.
+     * Supports optional namingStrategy ("AI_GENERATED" or "KEEP_ORIGINAL") or custom title.
+     */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MediaResponse> uploadMedia(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "width", required = false) Integer width,
             @RequestParam(value = "height", required = false) Integer height,
             @RequestParam(value = "capturedAt", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant capturedAt,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "namingStrategy", required = false, defaultValue = "AI_GENERATED") String namingStrategy,
             @RequestHeader(value = "X-User-Id", required = false) UUID userId) {
 
-        MediaResponse response = mediaService.uploadMedia(userId, file, width, height, capturedAt);
+        MediaResponse response = mediaService.uploadMedia(userId, file, width, height, capturedAt, title, namingStrategy);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Upload multiple image files at once (Bulk / Batch Upload).
+     * Accepts a list of files and applies namingStrategy to all items.
+     */
+    @PostMapping(value = "/batch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<List<MediaResponse>> uploadBatchMedia(
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam(value = "namingStrategy", required = false, defaultValue = "AI_GENERATED") String namingStrategy,
+            @RequestHeader(value = "X-User-Id", required = false) UUID userId) {
+
+        List<MediaResponse> responses = mediaService.uploadBatchMedia(userId, files, namingStrategy);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responses);
     }
 
     @GetMapping

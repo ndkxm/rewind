@@ -28,6 +28,13 @@ public class Media {
     @Column(name = "original_filename", length = 255)
     private String originalFilename;
 
+    /**
+     * User-facing display title.
+     * Can be set to originalFilename (KEEP_ORIGINAL) or populated by AI vision/OCR extraction (AI_GENERATED).
+     */
+    @Column(name = "title", length = 255)
+    private String title;
+
     @Column(name = "mime_type", nullable = false, length = 50)
     private String mimeType;
 
@@ -62,6 +69,7 @@ public class Media {
             UUID userId,
             String storagePath,
             String originalFilename,
+            String title,
             String mimeType,
             Long fileSizeBytes,
             Integer width,
@@ -74,6 +82,7 @@ public class Media {
         this.userId = Objects.requireNonNull(userId, "userId must not be null");
         this.storagePath = Objects.requireNonNull(storagePath, "storagePath must not be null");
         this.originalFilename = originalFilename;
+        this.title = title;
         this.mimeType = Objects.requireNonNull(mimeType, "mimeType must not be null");
         this.fileSizeBytes = Objects.requireNonNull(fileSizeBytes, "fileSizeBytes must not be null");
         this.width = width;
@@ -84,10 +93,27 @@ public class Media {
         this.updatedAt = Objects.requireNonNullElseGet(updatedAt, Instant::now);
     }
 
+    public Media(
+            UUID id,
+            UUID userId,
+            String storagePath,
+            String originalFilename,
+            String mimeType,
+            Long fileSizeBytes,
+            Integer width,
+            Integer height,
+            Instant capturedAt,
+            ProcessingStatus processingStatus,
+            Instant createdAt,
+            Instant updatedAt) {
+        this(id, userId, storagePath, originalFilename, null, mimeType, fileSizeBytes, width, height, capturedAt, processingStatus, createdAt, updatedAt);
+    }
+
     public static Media create(
             UUID userId,
             String storagePath,
             String originalFilename,
+            String title,
             String mimeType,
             Long fileSizeBytes,
             Integer width,
@@ -99,6 +125,7 @@ public class Media {
                 userId,
                 storagePath,
                 originalFilename,
+                title,
                 mimeType,
                 fileSizeBytes,
                 width,
@@ -108,6 +135,18 @@ public class Media {
                 now,
                 now
         );
+    }
+
+    public static Media create(
+            UUID userId,
+            String storagePath,
+            String originalFilename,
+            String mimeType,
+            Long fileSizeBytes,
+            Integer width,
+            Integer height,
+            Instant capturedAt) {
+        return create(userId, storagePath, originalFilename, null, mimeType, fileSizeBytes, width, height, capturedAt);
     }
 
     public UUID getId() {
@@ -124,6 +163,15 @@ public class Media {
 
     public String getOriginalFilename() {
         return originalFilename;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+        this.updatedAt = Instant.now();
     }
 
     public String getMimeType() {
