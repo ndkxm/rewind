@@ -38,6 +38,73 @@ paths:
                 service: "rewind-backend"
                 timestamp: "2026-11-07T12:00:00.000Z"
 
+  /api/v1/media:
+    get:
+      summary: List user media items (IMPLEMENTED)
+      description: Returns list of media items uploaded by the user with pre-signed view URLs.
+      operationId: listMedia
+      tags:
+        - Media
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of media items.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MediaResponse'
+    post:
+      summary: Upload new image (IMPLEMENTED)
+      description: Uploads image file to Supabase private storage and creates a media record.
+      operationId: uploadMedia
+      tags:
+        - Media
+      parameters:
+        - name: X-User-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The image file to upload.
+                width:
+                  type: integer
+                  description: Optional image width in pixels.
+                height:
+                  type: integer
+                  description: Optional image height in pixels.
+                capturedAt:
+                  type: string
+                  format: date-time
+                  description: Optional timestamp of when the photo was taken.
+      responses:
+        '201':
+          description: Image successfully uploaded and stored.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaResponse'
+
   # =========================================================================
   # PLANNED ENDPOINTS (Not yet implemented)
   # =========================================================================
@@ -78,24 +145,6 @@ paths:
       description: Returns profile and settings of authenticated user.
       tags:
         - Users (Planned)
-      responses:
-        '501':
-          description: Not implemented yet
-
-  /api/v1/media:
-    get:
-      summary: List user media items (PLANNED)
-      description: Returns paginated list of media belonging to authenticated user.
-      tags:
-        - Media (Planned)
-      responses:
-        '501':
-          description: Not implemented yet
-    post:
-      summary: Upload new image and OCR metadata (PLANNED)
-      description: Uploads image file to storage and creates media record + processing job.
-      tags:
-        - Media (Planned)
       responses:
         '501':
           description: Not implemented yet
@@ -210,3 +259,54 @@ components:
         details:
           type: object
           nullable: true
+
+    MediaResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - storagePath
+        - signedUrl
+        - originalFilename
+        - mimeType
+        - fileSizeBytes
+        - processingStatus
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        storagePath:
+          type: string
+        signedUrl:
+          type: string
+        originalFilename:
+          type: string
+        mimeType:
+          type: string
+        fileSizeBytes:
+          type: integer
+          format: int64
+        width:
+          type: integer
+          nullable: true
+        height:
+          type: integer
+          nullable: true
+        capturedAt:
+          type: string
+          format: date-time
+          nullable: true
+        processingStatus:
+          type: string
+          enum: [UPLOADED, PROCESSING, COMPLETED, FAILED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

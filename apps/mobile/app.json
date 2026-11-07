@@ -24,7 +24,14 @@
     },
     "plugins": [
       "expo-router",
-      "expo-status-bar"
+      "expo-status-bar",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Rewind requires access to your photos to upload documents and receipts.",
+          "cameraPermission": "Rewind requires access to your camera to photograph documents and receipts."
+        }
+      ]
     ]
   }
 }

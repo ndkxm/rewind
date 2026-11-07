@@ -33,7 +33,7 @@ flowchart LR
   - ADR and task templates
 
 ### Phase 1: First Vertical Slice
-- **Status:** **PLANNED**
+- **Status:** **IN PROGRESS (Core Implementation Complete)**
 - **Prerequisites:** Phase 0 complete
 - **Scope:**
   - Mobile: Camera capture and gallery image picker (`expo-image-picker`)
