@@ -9,7 +9,7 @@
 
 **Rewind** is an AI-powered mobile application for managing and extracting information from images. Users photograph documents, receipts, business cards, notes, and other paper-based content. Rewind uses AI vision models to extract text and structured data, making that information searchable and organized.
 
-**Current Status:** Bootstrap scaffold only. No features are implemented beyond a health endpoint.
+**Current Status:** Phase 1 implemented (in review) — image capture, upload, and media listing. Phase 2 (OCR) is next; its tasks are ready but not yet implemented.
 
 ---
 
@@ -50,7 +50,7 @@ rewind/
 
 ## Backend Rules (`apps/backend/`)
 
-- **Modular monolith:** The backend is organized as a modular monolith. Each module (auth, user, media, processing, extraction, search, storage, common) has its own package with clearly defined boundaries.
+- **Modular monolith:** The backend is organized as a modular monolith. Each module (auth, user, media, ocr, processing, extraction, search, storage, common) has its own package with clearly defined boundaries.
 - **Layer dependencies:** Each module follows a layered architecture:
   - `presentation` → `application` → `domain` ← `infrastructure`
   - Presentation depends on application. Application depends on domain. Infrastructure depends on domain. Domain depends on nothing within the module.
@@ -130,7 +130,7 @@ cd apps/backend && ./gradlew build
 
 ## Critical Rule
 
-> **Never fabricate implementation status.** If a feature, endpoint, or component is not yet implemented, say so clearly. Do not describe planned features as if they already exist. The health endpoint (`GET /api/v1/health`) is currently the **only** implemented endpoint.
+> **Never fabricate implementation status.** If a feature, endpoint, or component is not yet implemented, say so clearly. Do not describe planned features as if they already exist. The currently implemented endpoints are `GET /api/v1/health`, `POST /api/v1/media`, `POST /api/v1/media/batch`, and `GET /api/v1/media`.
 
 ---
 

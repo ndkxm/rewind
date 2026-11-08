@@ -1,6 +1,6 @@
 # System Architecture — Rewind
 
-> **Status:** PROPOSED architecture. Nothing described here is implemented unless explicitly labeled otherwise. Only the backend health endpoint currently exists.
+> **Status:** PARTIALLY IMPLEMENTED. Phase 1 (capture, upload, media listing) is implemented; the AI processing stages (OCR onwards) are PLANNED. See [STATUS.md](../implementation/STATUS.md).
 
 ---
 
@@ -64,29 +64,29 @@
 - **Platform:** Android-first (Expo enables iOS later)
 - **Key features:** Camera integration, image library browsing, search interface, extracted data display
 - **Does NOT:** Process images, call AI APIs directly, store permanent data locally
-- **Status:** Scaffold only
+- **Status:** Implemented (Phase 1): camera capture, gallery picker, upload, library
 
 ### Backend API (Java 21 + Spring Boot)
 
 - **Responsibility:** Business logic, authentication, image processing orchestration, data persistence, AI provider integration
 - **Architecture:** Modular monolith (see [Backend Architecture](BACKEND_ARCHITECTURE.md))
 - **API:** RESTful, versioned (`/api/v1/`), documented via OpenAPI
-- **Status:** Scaffold with health endpoint only (`GET /api/v1/health` — IMPLEMENTED)
+- **Status:** Implemented (Phase 1): health check + media upload/list endpoints
 
 ### PostgreSQL Database
 
 - **Responsibility:** Persistent storage of user accounts, image metadata, extracted text, structured data, tags, processing status
 - **Access:** Backend only (never directly from mobile)
-- **Migrations:** Flyway (planned)
+- **Migrations:** Flyway (implemented; V1, V2 applied)
 - **Schema:** See [Database Design](DATABASE_DESIGN.md)
-- **Status:** PLANNED — not provisioned
+- **Status:** Implemented (partial): `users` and `media` tables created
 
 ### Supabase Storage
 
 - **Responsibility:** Blob storage for uploaded images
 - **Access:** Backend-mediated (mobile uploads through the backend API, which stores to Supabase)
 - **Privacy:** All buckets/paths are private; no public URLs
-- **Status:** PLANNED — not provisioned
+- **Status:** Implemented (private bucket + signed view URLs)
 
 ### Groq Vision API
 
@@ -115,7 +115,7 @@
                           │
 3. STORE         Backend stores image in Supabase Storage
                           │
-4. OCR           Backend sends image to Groq Vision for text extraction
+4. OCR           Mobile runs on-device ML Kit; submits extracted text to backend (Phase 2)
                           │
 5. AI ANALYSIS   Backend sends image + OCR text to Groq Vision for structured extraction
                           │

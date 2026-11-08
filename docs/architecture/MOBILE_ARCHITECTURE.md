@@ -1,6 +1,6 @@
 # Mobile Architecture — Rewind
 
-> **Status:** PROPOSED architecture. The mobile app is currently a scaffold only. Nothing described here is implemented unless explicitly labeled.
+> **Status:** IMPLEMENTED in part. The `camera` feature (capture, upload, library) is implemented; the remaining features are placeholder stubs. See [STATUS.md](../implementation/STATUS.md).
 
 ---
 
@@ -17,43 +17,37 @@ Code is organized by feature, not by type. Each feature is a self-contained modu
 ```
 apps/mobile/
 ├── app/                         # Expo Router pages (file-based routing)
-│   ├── (tabs)/
-│   │   ├── index.tsx            # Home / Library tab
-│   │   ├── camera.tsx           # Camera / Capture tab
-│   │   └── search.tsx           # Search tab
-│   ├── media/
-│   │   └── [id].tsx             # Media detail screen
-│   ├── _layout.tsx              # Root layout
-│   └── +not-found.tsx           # 404 screen
+│   ├── _layout.tsx              # Root Stack layout (header hidden)
+│   └── index.tsx                # Home / Library screen
 ├── src/
+│   ├── api/
+│   │   └── client.ts            # Centralized API base URL (EXPO_PUBLIC_API_URL)
 │   ├── features/
-│   │   ├── camera/              # Image capture feature
-│   │   │   ├── components/      # Feature-specific UI components
-│   │   │   ├── screens/         # Screen components (used by app/ routes)
-│   │   │   ├── hooks/           # Feature-specific hooks
-│   │   │   ├── services/        # API calls for this feature
-│   │   │   ├── types/           # TypeScript types for this feature
+│   │   ├── camera/              # Image capture feature (IMPLEMENTED)
+│   │   │   ├── components/      # CaptureBar, ImagePreviewModal, DocumentDetailModal
+│   │   │   ├── hooks/           # useMediaCapture
+│   │   │   ├── services/        # mediaApi (upload, batch, fetch)
+│   │   │   ├── types.ts         # ProcessingStatus, MediaItem, etc.
+│   │   │   ├── status.ts        # STATUS_META status → label/color mapping
 │   │   │   └── index.ts         # Public exports
-│   │   ├── library/             # Image library / browsing
-│   │   ├── search/              # Search functionality
-│   │   ├── media-detail/        # Single image detail view
-│   │   └── auth/                # Authentication
-│   ├── shared/
-│   │   ├── components/          # Shared UI components
-│   │   ├── hooks/               # Shared hooks
-│   │   ├── services/            # Shared API client, etc.
-│   │   ├── types/               # Shared TypeScript types
-│   │   ├── utils/               # Utility functions
-│   │   └── constants/           # App-wide constants
-│   └── api/
-│       ├── client.ts            # HTTP client configuration
-│       ├── endpoints.ts         # Endpoint URL definitions
-│       └── types.ts             # API request/response types
-├── assets/                      # Static assets (images, fonts)
+│   │   ├── auth/                # Placeholder (PLANNED)
+│   │   ├── gallery/             # Placeholder (PLANNED)
+│   │   ├── memories/            # Placeholder (PLANNED)
+│   │   ├── processing/          # Placeholder (PLANNED)
+│   │   ├── search/              # Placeholder (PLANNED)
+│   │   └── settings/            # Placeholder (PLANNED)
+│   ├── components/              # Shared components placeholder
+│   ├── services/                # Shared services placeholder
+│   ├── store/                   # Shared state placeholder
+│   ├── types/                   # Shared types placeholder
+│   ├── utils/                   # Shared utilities placeholder
+│   └── theme/                   # Design tokens (colors, spacing, typography)
+├── assets/                      # Static assets (app icons, splash)
 ├── package.json
 ├── tsconfig.json
 ├── app.json                     # Expo configuration
-└── .env.example                 # Environment variable template
+├── .env.example                 # Environment variable template
+└── .gitignore
 ```
 
 ---
@@ -64,9 +58,9 @@ apps/mobile/
 
 Navigation is handled by **Expo Router**, which uses the file system under `app/` to define routes. This is analogous to Next.js file-based routing.
 
-- `app/(tabs)/` — Tab navigator with Library, Camera, and Search tabs
-- `app/media/[id].tsx` — Dynamic route for viewing a specific media item
-- `app/_layout.tsx` — Root layout wrapping all screens
+- `app/_layout.tsx` — Root Stack layout (header hidden)
+- `app/index.tsx` — Home / Library screen (implemented)
+- `app/(tabs)/` and `app/media/[id].tsx` — planned for later phases
 
 **Conventions:**
 - Route files in `app/` are thin wrappers that render screen components from `src/features/`.
@@ -105,9 +99,8 @@ Component → Feature Hook → Feature Service → API Client → Backend
 
 ### API Client (`src/api/client.ts`)
 
-- Centralized HTTP client configuration (base URL, headers, auth token injection)
-- Standardized error handling and response parsing
-- Request/response interceptors for auth refresh, logging, etc.
+- Centralized base URL configuration: exports `API_BASE_URL` sourced from `EXPO_PUBLIC_API_URL` (see `apps/mobile/.env.example`); `localhost:8080` is the dev fallback — no hardcoded LAN IP.
+- Standardized error handling, auth token injection, and interceptors are still PLANNED; the full `apiClient` wrapper will be introduced in a later phase.
 
 ### Feature Services (`src/features/*/services/`)
 

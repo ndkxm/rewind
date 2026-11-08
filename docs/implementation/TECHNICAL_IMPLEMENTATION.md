@@ -15,7 +15,7 @@
 | **Backend Build** | Gradle (Kotlin DSL) | Modern, expressive, standardized within Spring Boot ecosystem | Maven, Gradle Groovy DSL |
 | **Database** | PostgreSQL + Flyway | ACID-compliant relational data modeling, schema evolution via versioned migrations | MySQL, MongoDB |
 | **Vector Search** | PostgreSQL with pgvector (Planned) | Keeps vector data inside the same database without running a separate vector DB service | Pinecone, Qdrant, Milvus |
-| **Object Storage** | Supabase Storage (Planned) | Managed S3-compatible private object storage with signed URL capability | AWS S3, Cloudflare R2 |
+| **Object Storage** | Supabase Storage (Implemented) | Managed S3-compatible private object storage with signed URL capability | AWS S3, Cloudflare R2 |
 | **Vision AI** | Groq Vision (Planned) | Fast inference speed, managed API with image understanding | OpenAI GPT-4o, Anthropic Claude 3.5 Sonnet |
 | **Embedding** | Jina Embeddings (Planned) | High-performance multimodal/text embeddings for semantic search | OpenAI text-embedding-3, Voyage AI |
 
@@ -43,8 +43,8 @@ Populate local database and service credentials. **Never commit `.env` or any pr
 
 As stated in the bootstrap specification, the following choices are deliberately **open** and require explicit owner confirmation:
 1. Final application display name, package ID, and Android application ID.
-2. Authentication strategy (JWT with refresh token vs session cookies).
-3. OCR execution model: fully on-device (ML Kit) vs server-side fallback.
+2. Authentication strategy (JWT with refresh token vs session cookies). Current code is a dev stub: optional `X-User-Id` header falling back to a seeded dev user (`DEFAULT_DEV_USER_ID`).
+3. ~~OCR execution model: fully on-device (ML Kit) vs server-side fallback.~~ **Resolved** — on-device ML Kit primary, backend fallback deferred to Phase 3 (see [ADR-0002](../decisions/ADR-0002-ocr-execution-model-and-processing-states.md)).
 4. Specific Groq Vision model ID and Jina embedding model selection.
 5. Supabase Storage vs AWS S3 / Cloudflare R2 for production media storage.
 6. Final database schema and retention/deletion policy for user media and AI-derived metadata.

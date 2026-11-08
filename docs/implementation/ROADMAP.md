@@ -1,7 +1,7 @@
 # Rewind Implementation Roadmap
 
 > Status: Master plan for Rewind implementation.
-> All phases beyond Phase 0 are **PLANNED**. Do not claim features as implemented unless verified in code.
+> Phase 0 and Phase 1 are complete. Phase 2 is the current focus. Do not claim features as implemented unless verified in code.
 
 ---
 
@@ -9,8 +9,8 @@
 
 ```mermaid
 flowchart LR
-    P0["Phase 0<br/>Repo Foundation<br/>(CURRENT)"] --> P1["Phase 1<br/>Vertical Slice<br/>(Capture & Upload)"]
-    P1 --> P2["Phase 2<br/>OCR Processing"]
+    P0["Phase 0<br/>Repo Foundation<br/>(DONE)"] --> P1["Phase 1<br/>Vertical Slice<br/>(Capture & Upload)"]
+    P1 --> P2["Phase 2<br/>OCR Processing<br/>(CURRENT)"]
     P2 --> P3["Phase 3<br/>AI Extraction"]
     P3 --> P4["Phase 4<br/>Library & Search"]
     P4 --> P5["Phase 5<br/>Semantic Search"]
@@ -22,7 +22,7 @@ flowchart LR
 ## Phases
 
 ### Phase 0: Repository Foundation
-- **Status:** **IN PROGRESS (Finishing)**
+- **Status:** **DONE**
 - **Scope:**
   - Monorepo structure with `apps/mobile` and `apps/backend`
   - Root agent instruction set (`AGENTS.md`, `CLAUDE.md`, `README.md`)
@@ -33,7 +33,7 @@ flowchart LR
   - ADR and task templates
 
 ### Phase 1: First Vertical Slice
-- **Status:** **IN PROGRESS (Core Implementation Complete)**
+- **Status:** **DONE (in review)**
 - **Prerequisites:** Phase 0 complete
 - **Scope:**
   - Mobile: Camera capture and gallery image picker (`expo-image-picker`)
@@ -45,13 +45,13 @@ flowchart LR
   - Mobile: Display uploaded image confirmation
 
 ### Phase 2: OCR Integration
-- **Status:** **PLANNED**
+- **Status:** **IN PROGRESS (tasks ready; implementation not started)**
 - **Prerequisites:** Phase 1 complete
 - **Scope:**
-  - Mobile: On-device OCR integration (Google ML Kit Text Recognition)
-  - Mobile: Send OCR text payload alongside media upload
-  - Backend: `ocr_results` entity and migration
-  - Backend: Storage and retrieval of raw text and bounding boxes
+  - Mobile: On-device OCR integration (Google ML Kit Text Recognition) — see [ADR-0002](../decisions/ADR-0002-ocr-execution-model-and-processing-states.md)
+  - Mobile: Send OCR text payload to `POST /api/v1/media/{id}/ocr`
+  - Backend: `ocr_results` entity and migration (`V3`)
+  - Backend: Storage and retrieval of raw text
   - Mobile: Display extracted raw text in image detail view
 
 ### Phase 3: AI Structured Extraction

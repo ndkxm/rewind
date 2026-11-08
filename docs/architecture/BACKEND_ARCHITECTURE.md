@@ -1,6 +1,6 @@
 # Backend Architecture — Rewind
 
-> **Status:** PROPOSED architecture. The backend is currently a scaffold with only a health endpoint implemented. Nothing described here is implemented unless explicitly labeled.
+> **Status:** IMPLEMENTED in part. The `media` module (upload/list), `storage` integration, and `common` (health check) are implemented; the remaining modules are PLANNED. See [STATUS.md](../implementation/STATUS.md).
 
 ---
 
@@ -29,12 +29,13 @@ See [ADR-0001](../decisions/ADR-0001-monorepo.md) for the monorepo decision that
 |---|---|---|
 | **auth** | User authentication, token management, session handling | Planned |
 | **user** | User profile management, preferences | Planned |
-| **media** | Image metadata, library management, CRUD operations | Planned |
+| **media** | Image metadata, library management, CRUD operations | Implemented |
+| **ocr** | Raw OCR text persistence and retrieval | Ready (Phase 2) |
 | **processing** | Processing job orchestration, status tracking | Planned |
 | **extraction** | AI-powered text and structured data extraction | Planned |
 | **search** | Full-text and semantic search | Planned |
-| **storage** | File storage abstraction (Supabase Storage integration) | Planned |
-| **common** | Shared utilities, base classes, cross-cutting concerns | Planned |
+| **storage** | File storage abstraction (Supabase Storage integration) | Implemented |
+| **common** | Shared utilities, base classes, cross-cutting concerns | Implemented |
 
 ---
 
@@ -53,6 +54,11 @@ com.rewind/
 │   ├── domain/
 │   └── infrastructure/
 ├── media/
+│   ├── presentation/
+│   ├── application/
+│   ├── domain/
+│   └── infrastructure/
+├── ocr/
 │   ├── presentation/
 │   ├── application/
 │   ├── domain/

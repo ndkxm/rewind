@@ -1,6 +1,6 @@
 # Database Design — Rewind
 
-> **Status:** PROPOSED — schema is not yet created. No database is provisioned. This document describes the intended data model for the PostgreSQL database.
+> **Status:** PARTIALLY IMPLEMENTED — the `users` and `media` tables exist (Flyway migrations `V1__create_users_and_media.sql` and `V2__add_title_and_naming_to_media.sql`). All other tables described below are PROPOSED.
 
 ---
 
