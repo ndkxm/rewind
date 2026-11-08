@@ -1,7 +1,6 @@
 import { File } from "expo-file-system";
 import { MediaItem, SelectedImage, NamingStrategy } from "../types";
-
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.0.103:8080";
+import { API_BASE_URL } from "../../../api/client";
 
 export function normalizeImageUrl(url?: string): string {
   if (!url) return "";
