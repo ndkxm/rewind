@@ -9,14 +9,16 @@ Implement PostgreSQL Flyway migration for `ocr_results` table, create the domain
 ## Context
 Phase 2 requires the Rewind backend to persist raw extracted text, language detection, and confidence scores linked to each uploaded media item. This raw text forms the foundation for AI structured extraction (Phase 3) and full-text keyword search (Phase 4).
 
+> **Migration note:** `V2__add_title_and_naming_to_media.sql` is already applied, so the OCR migration is `V3`. Flyway migrations are immutable — never reuse an existing version number.
+
 ## Requirements
-- [ ] Create Flyway migration `V2__create_ocr_results.sql` with `ocr_results` table, foreign key constraint to `media(id)`, and indices.
-- [ ] Implement `OcrResult` entity in `com.rewind.app.ocr.domain` or `com.rewind.app.media.domain`.
+- [ ] Create Flyway migration `V3__create_ocr_results.sql` with `ocr_results` table, foreign key constraint to `media(id)`, and indices.
+- [ ] Implement `OcrResult` entity in `com.rewind.app.ocr.domain`.
 - [ ] Implement `OcrRepository` with Spring Data JPA.
 - [ ] Implement `OcrService` handling creation, retrieval, and ownership validation for OCR results.
 - [ ] Expose `POST /api/v1/media/{id}/ocr` to accept OCR text payload (rawText, language, confidence, provider).
 - [ ] Expose `GET /api/v1/media/{id}/ocr` to return OCR details for a given media ID.
-- [ ] Update `Media` processing status to `COMPLETED` or `OCR_PROCESSED` upon successful OCR persistence.
+- [ ] Update `Media` processing status to `OCR_COMPLETED` upon successful OCR persistence.
 - [ ] Add unit and controller mock MVC tests.
 - [ ] Update `docs/api/openapi.yaml` to document the new endpoints.
 
@@ -25,14 +27,14 @@ Phase 2 requires the Rewind backend to persist raw extracted text, language dete
 - Vector embeddings and semantic search (deferred to Phase 5).
 
 ## Acceptance criteria
-- [ ] Flyway migration `V2__create_ocr_results.sql` applies cleanly on top of `V1`.
+- [ ] Flyway migration `V3__create_ocr_results.sql` applies cleanly on top of `V2`.
 - [ ] `POST /api/v1/media/{id}/ocr` persists OCR record and returns HTTP 201 with `OcrResultResponse`.
 - [ ] `GET /api/v1/media/{id}/ocr` returns HTTP 200 with persisted OCR data or HTTP 404 if not yet processed.
 - [ ] Ownership validation verifies media belongs to the requesting user before reading or writing OCR.
 - [ ] Backend tests pass via `./gradlew test`.
 
 ## Relevant files and docs
-- `apps/backend/src/main/resources/db/migration/V2__create_ocr_results.sql`
+- `apps/backend/src/main/resources/db/migration/V3__create_ocr_results.sql`
 - `apps/backend/src/main/java/com/rewind/app/ocr/`
 - `apps/backend/src/main/java/com/rewind/app/media/`
 - `docs/architecture/DATABASE_DESIGN.md`

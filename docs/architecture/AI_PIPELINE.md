@@ -1,6 +1,6 @@
 # AI Processing Pipeline — Rewind
 
-> **Status:** PROPOSED DESIGN. Nothing described here is implemented. This document describes the intended architecture for AI-powered image processing.
+> **Status:** DESIGN (partially implemented). Step 1 (capture) and Step 2 (upload) are implemented; Step 3 (OCR) runs **on-device** and is the focus of Phase 2 (see [ADR-0002](../decisions/ADR-0002-ocr-execution-model-and-processing-states.md)). Steps 4–6 (vision analysis, structured extraction, embedding) are PROPOSED for Phases 3–5.
 
 ---
 
@@ -11,8 +11,8 @@ When a user captures and uploads an image, it flows through a multi-stage proces
 ```
 ┌──────────┐    ┌──────────┐    ┌─────────┐    ┌───────────────┐    ┌─────────────────┐    ┌───────────┐    ┌──────────┐
 │ CAPTURE  │ →  │ UPLOAD   │ →  │  OCR    │ →  │ VISION        │ →  │ STRUCTURED      │ →  │ EMBEDDING │ →  │ DISPLAY  │
-│ (Mobile) │    │ (Mobile  │    │ (Back-  │    │ ANALYSIS      │    │ EXTRACTION      │    │ (Backend) │    │ (Mobile) │
-│          │    │  → Back) │    │  end)   │    │ (Backend)     │    │ (Backend)       │    │           │    │          │
+│ (Mobile) │    │ (Mobile  │    │ (On-    │    │ ANALYSIS      │    │ EXTRACTION      │    │ (Backend) │    │ (Mobile) │
+│          │    │  → Back) │    │ device) │    │ (Backend)     │    │ (Backend)       │    │           │    │          │
 └──────────┘    └──────────┘    └─────────┘    └───────────────┘    └─────────────────┘    └───────────┘    └──────────┘
 ```
 
@@ -34,14 +34,14 @@ When a user captures and uploads an image, it flows through a multi-stage proces
 - **Output:** Media ID, storage path, initial processing job record
 - **Response to mobile:** Media ID and status `UPLOADED`
 
-### Step 3: OCR (Backend)
+### Step 3: OCR (On-device → Backend)
 
-- **Responsibility:** Backend
-- **Action:** Backend sends the image to Groq Vision API with a prompt requesting raw text extraction (OCR). The full text content of the image is returned.
-- **Input:** Image from Supabase Storage
-- **Output:** Raw extracted text
-- **Storage:** OCR text saved to `ocr_results` table; processing state updated to `OCR_COMPLETED`
-- **Failure handling:** If OCR fails, state moves to `FAILED` with error details. Retry is possible.
+- **Responsibility:** Mobile (recognition) + Backend (persistence)
+- **Action:** The mobile app runs Google ML Kit Text Recognition on the device (see [ADR-0002](../decisions/ADR-0002-ocr-execution-model-and-processing-states.md)). The extracted raw text is submitted to `POST /api/v1/media/{id}/ocr`.
+- **Input:** Image on the device
+- **Output:** Raw extracted text submitted to the backend
+- **Storage:** Backend saves OCR text to `ocr_results` (`provider = mlkit`) and updates processing state to `OCR_COMPLETED`.
+- **Failure handling:** If OCR fails or no text is detected, the mobile app surfaces an error and the media record keeps its prior state. A server-side vision OCR fallback is deferred to Phase 3.
 
 ### Step 4: Vision Analysis (Backend)
 
@@ -123,6 +123,10 @@ Each media item's processing is tracked via a state machine:
 | `ANALYSIS_COMPLETED` | `COMPLETED` | Structured extraction + embedding succeed |
 | Any state | `FAILED` | Unrecoverable error or max retries exceeded |
 | `FAILED` | `PENDING` | Manual or automatic retry triggered |
+
+> **Implemented now (Phase 2):** `UPLOADED`, `PROCESSING`, `OCR_COMPLETED`, `COMPLETED`, `FAILED`.
+> **Proposed (Phases 3+):** `PENDING` (async queueing) and `ANALYSIS_COMPLETED` (vision analysis).
+> The enum lives in `apps/backend/src/main/java/com/rewind/app/media/domain/ProcessingStatus.java`; changes must be synced with `docs/api/openapi.yaml` (`MediaResponse.processingStatus`) and `apps/mobile/src/features/camera/types.ts` (see [ADR-0002](../decisions/ADR-0002-ocr-execution-model-and-processing-states.md)).
 
 ---
 

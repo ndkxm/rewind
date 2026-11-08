@@ -9,9 +9,11 @@ Integrate on-device optical character recognition (OCR) on the React Native mobi
 ## Context
 Phase 2 enables immediate client-side text recognition on captured documents and receipts. By performing OCR on-device or right after capture, users get immediate feedback on scanned content, and the backend receives recognized text for indexing and future AI structuring.
 
+> **Decision (ADR-0002):** OCR runs **on-device** with Google ML Kit Text Recognition; the backend only persists the submitted text. Preferred package: `@infinitered/react-native-mlkit-text-recognition` (Expo module, MIT). Because it is a native module, OCR requires a **development build** — it will not run in Expo Go. The app must degrade gracefully in Expo Go via a lazy import and an `isOcrAvailable` flag.
+
 ## Requirements
-- [ ] Research and configure mobile OCR library compatible with Expo SDK 58 (e.g., ML Kit Text Recognition native module or compatible plugin).
-- [ ] Create `ocrService.ts` in `src/features/camera/services/` or `src/features/ocr/` to run text recognition on selected/captured images.
+- [ ] Configure `@infinitered/react-native-mlkit-text-recognition` via `npx expo install` and verify Expo SDK 58 compatibility (fallback: `@react-native-ml-kit/text-recognition`).
+- [ ] Create `ocrService.ts` in `src/features/camera/services/` to run text recognition on selected/captured images, with a lazy import + `isOcrAvailable` flag for graceful Expo Go degradation.
 - [ ] Connect OCR workflow to `useMediaCapture`: trigger text extraction after image capture or preview confirmation.
 - [ ] Send extracted text payload to backend endpoint `POST /api/v1/media/{id}/ocr`.
 - [ ] Enhance `DocumentDetailModal.tsx` to fetch and render raw extracted text with a "Copy Text" button and confidence badge.
