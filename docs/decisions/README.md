@@ -39,3 +39,4 @@ What needs to be implemented or revisited?
 | ID | Title | Status | Date |
 |---|---|---|---|
 | [ADR-0001](ADR-0001-monorepo.md) | Single Monorepo without Monorepo Framework | Accepted | 2026-11-07 |
+| [ADR-0002](ADR-0002-ocr-execution-model-and-processing-states.md) | OCR Execution Model and Processing States | Accepted | 2026-11-08 |
