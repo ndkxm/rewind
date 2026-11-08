@@ -19,6 +19,7 @@ import {
   useMediaCapture,
   fetchUserMedia,
   normalizeImageUrl,
+  getStatusMeta,
   MediaItem,
 } from "../src/features/camera";
 import { theme } from "../src/theme";
@@ -281,8 +282,10 @@ export default function HomeScreen() {
                     resizeMode="cover"
                   />
                   <View style={styles.gridStatusPill}>
-                    <Text style={styles.gridStatusText}>
-                      {item.processingStatus === "UPLOADED" ? "SAVED" : item.processingStatus}
+                    <Text
+                      style={[styles.gridStatusText, { color: getStatusMeta(item.processingStatus).color }]}
+                    >
+                      {getStatusMeta(item.processingStatus).label}
                     </Text>
                   </View>
                 </View>
@@ -327,8 +330,17 @@ export default function HomeScreen() {
                 </View>
 
                 <View style={styles.listRight}>
-                  <View style={styles.listStatusBadge}>
-                    <Text style={styles.listStatusText}>{item.processingStatus}</Text>
+                  <View
+                    style={[
+                      styles.listStatusBadge,
+                      { backgroundColor: getStatusMeta(item.processingStatus).background },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.listStatusText, { color: getStatusMeta(item.processingStatus).color }]}
+                    >
+                      {getStatusMeta(item.processingStatus).label}
+                    </Text>
                   </View>
                   <Feather name="chevron-right" size={16} color={theme.colors.textMuted} />
                 </View>
@@ -623,7 +635,6 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.12)",
   },
   gridStatusText: {
-    color: theme.colors.success,
     fontSize: 10,
     fontWeight: "700",
   },
@@ -678,13 +689,11 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm,
   },
   listStatusBadge: {
-    backgroundColor: theme.colors.successBg,
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: theme.borderRadius.sm,
   },
   listStatusText: {
-    color: theme.colors.success,
     fontSize: 10,
     fontWeight: "700",
   },

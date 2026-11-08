@@ -1,4 +1,9 @@
-export type ProcessingStatus = "UPLOADED" | "PROCESSING" | "COMPLETED" | "FAILED";
+export type ProcessingStatus =
+  | "UPLOADED"
+  | "PROCESSING"
+  | "OCR_COMPLETED"
+  | "COMPLETED"
+  | "FAILED";
 
 /**
  * NamingStrategy defines how documents are named when uploaded:

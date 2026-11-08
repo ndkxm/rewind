@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { MediaItem } from "../types";
+import { getStatusMeta } from "../status";
 import { normalizeImageUrl } from "../services/mediaApi";
 import { theme } from "../../../theme";
 
@@ -26,6 +27,8 @@ export function DocumentDetailModal({
   onClose,
 }: DocumentDetailModalProps) {
   if (!item) return null;
+
+  const statusMeta = getStatusMeta(item.processingStatus);
 
   const formattedDate = item.createdAt
     ? new Date(item.createdAt).toLocaleDateString(undefined, {
@@ -62,9 +65,16 @@ export function DocumentDetailModal({
               <Text style={styles.subtitle}>{formattedDate}</Text>
             </View>
 
-            <View style={styles.statusBadge}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusText}>{item.processingStatus}</Text>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: statusMeta.background, borderColor: statusMeta.border },
+              ]}
+            >
+              <View style={[styles.statusDot, { backgroundColor: statusMeta.color }]} />
+              <Text style={[styles.statusText, { color: statusMeta.color }]}>
+                {statusMeta.label}
+              </Text>
             </View>
           </View>
 
@@ -168,22 +178,18 @@ const styles = StyleSheet.create({
   statusBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: theme.colors.successBg,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: theme.borderRadius.round,
     borderWidth: 1,
-    borderColor: theme.colors.successBorder,
     gap: 6,
   },
   statusDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: theme.colors.success,
   },
   statusText: {
-    color: theme.colors.success,
     fontSize: 11,
     fontWeight: "700",
   },

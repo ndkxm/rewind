@@ -4,8 +4,9 @@ info:
   description: |
     REST API for Rewind — AI-powered mobile application for managing and extracting information from images.
 
-    Status: Bootstrap initial contract.
-    Only the health check endpoint is currently IMPLEMENTED. All other endpoints are PLANNED.
+    Status: Phase 1 (vertical slice) implemented.
+    IMPLEMENTED: health check, media upload (single + batch), and media listing.
+    PLANNED: authentication, users, media detail/delete, processing, search, tags.
   version: 0.1.0
   contact:
     name: Rewind Team
@@ -359,7 +360,7 @@ components:
           nullable: true
         processingStatus:
           type: string
-          enum: [UPLOADED, PROCESSING, COMPLETED, FAILED]
+          enum: [UPLOADED, PROCESSING, OCR_COMPLETED, COMPLETED, FAILED]
         createdAt:
           type: string
           format: date-time
